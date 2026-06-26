@@ -174,11 +174,19 @@ def generate_media_via_banana(trigger_type, visual_description):
         return None, None
 
 
+
+
+
+
+# ОБНОВЛЕННАЯ ФУНКЦИЯ: Diagnostic Edition
 def handle_bot_output_media(bot, chat_id, llm_response_text):
     """
-    Функция-перехватчик. Ищет тег генерации в ответе ИИ, 
-    вырезает его, отправляет медиа и возвращает чистый текст для юзера.
+    Функция-перехватчик. Теперь ловит ошибки и пишет их в Телеграм.
     """
+    # 1. Показываем тебе в чате ВЕСЬ текст, который выдал ИИ (чтобы проверить, есть ли там тег)
+    # Это временная мера для отладки.
+    # bot.send_message(chat_id, f"📝 DEBUG: Gemini Output -> `{llm_response_text}`", parse_mode='Markdown')
+    
     # Регулярное выражение ищет формат [ГЕНЕРАЦИЯ: тип, описание]
     pattern = r"\[ГЕНЕРАЦИЯ:\s*(.*?),\s*(.*?)\]"
     match = re.search(pattern, llm_response_text)
@@ -193,25 +201,37 @@ def handle_bot_output_media(bot, chat_id, llm_response_text):
         # Сначала отправляем текст, чтобы бот не молчал во время генерации
         if clean_text:
             bot.send_message(chat_id, clean_text)
-            clean_text = "" # Сбрасываем, чтобы дважды не отправлять
             
         # Запускаем генерацию медиа
         bot.send_chat_action(chat_id, 'upload_photo')
-        media_bytes, content_type = generate_media_via_banana(trigger_type, visual_description)
         
-        if media_bytes:
-            # Если вернулось видео (mp4, webm и т.д.)
-            if 'video' in content_type:
-                bot.send_video(chat_id, media_bytes, caption="🎬")
-            # Во всех остальных случаях отправляем как фото
-            else:
-                bot.send_photo(chat_id, media_bytes, caption="📸")
-        else:
-            bot.send_message(chat_id, "*(Прислал битый файл/Сообщение не загрузилось)*")
+        try:
+            # Делаем try...except КРУГОМ генерации и отправки Telegram
+            media_bytes, content_type = generate_media_via_banana(trigger_type, visual_description)
             
-        return clean_text
+            if media_bytes:
+                # Если вернулось видео (mp4, webm и т.д.)
+                if 'video' in content_type:
+                    bot.send_video(chat_id, media_bytes, caption="🎬 (Видео)")
+                # Во всех остальных случаях отправляем как фото
+                else:
+                    bot.send_photo(chat_id, media_bytes, caption="📸 (Фото)")
+            else:
+                # ГЕНЕРАТОР ВЕРНУЛ ОШИБКУ (код != 200)
+                bot.send_message(chat_id, f"❌ ОШИБКА BANANA API: Сервер нано банана не ответил/вернул ошибку. Проверь токен или статус сети.")
+                
+        except requests.exceptions.RequestException as e:
+            # Ошибка именно в запросе в интернет
+            bot.send_message(chat_id, f"❌ ОШИБКА СЕТИ: Бот не смог достучаться до нано банана.\nДетали: `{str(e)}`", parse_mode='Markdown')
+        except Exception as e:
+            # Любая другая ошибка (например, с файлами или Telegram API)
+            bot.send_message(chat_id, f"❌ КРИТИЧЕСКАЯ ОШИБКА КОДА:\nДетали: `{str(e)}`", parse_mode='Markdown')
+            
+        return "" # Сообщение больше не выводим
     
+    # Если тег не найден — просто выводим текст
     return llm_response_text
+
 
 
 # === БЛОК ВОСПРИЯТИЯ ВХОДЯЩИХ ФАЙЛОВ ОТ ПОЛЬЗОВАТЕЛЯ ===
