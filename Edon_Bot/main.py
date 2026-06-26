@@ -9,13 +9,13 @@ import urllib.parse
 # ==========================================
 # ⚙️ НАСТРОЙКИ LINK API И ТЕЛЕГРАМА:
 # ==========================================
-TELEGRAM_TOKEN = "8879272306:AAENHKswKWHT5gv9uRqdoFngtS3ypDe4t28"
-GEMINI_API_KEY = "sk-KI1dgvQfqPJyOQFM8CuIlldedJeKBh4cQtMiAuhJgevRYAAR"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_URL = "https://linkapi.ai/v1/chat/completions"
 MODEL_NAME = "[次]gemini-3.1-pro-preview"
 
 # === НАСТРОЙКИ МЕДИА-ДВИЖКА ===
-NANO_BANANA_TOKEN = "-T4ZhWwDYe_v9cfOsUjfIbYk"
+NANO_BANANA_TOKEN = os.getenv("NANO_BANANA_TOKEN")
 BANANA_BASE_URL = "https://naistera.org/prompt/"
 REFS_DIR = "appearance_refs" 
 
