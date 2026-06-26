@@ -38,21 +38,21 @@ def generate_media_via_banana(trigger_type, visual_description):
     style_prompt = load_file("image_prompt.txt", "realism, 90s retro style, analog film grain, cinematic lighting")
     final_prompt = f"{style_prompt}, {visual_description}"
     
-    if trigger_type == "селфи" or trigger_type == "себя":
-    if os.path.exists(REFS_DIR) and os.listdir(REFS_DIR):
-        all_refs = [f for f in os.listdir(REFS_DIR) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-        if all_refs:
-            chosen_ref = random.choice(all_refs)
-            ref_path = os.path.join(REFS_DIR, chosen_ref)
-            # Читаем картинку и превращаем в base64
-            with open(ref_path, "rb") as img_file:
-                img_data = base64.b64encode(img_file.read()).decode('utf-8')
-            # Определяем тип файла по расширению
-            ext = os.path.splitext(chosen_ref)[1].lower()
-            mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png"
-            # Вставляем картинку прямо в промпт как data URL
-            data_url = f"data:{mime};base64,{img_data}"
-            final_prompt = f"{data_url} {final_prompt}"
+if trigger_type == "селфи" or trigger_type == "себя":
+        if os.path.exists(REFS_DIR) and os.listdir(REFS_DIR):
+            all_refs = [f for f in os.listdir(REFS_DIR) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+            if all_refs:
+                chosen_ref = random.choice(all_refs)
+                ref_path = os.path.join(REFS_DIR, chosen_ref)
+                # Читаем картинку и превращаем в base64
+                with open(ref_path, "rb") as img_file:
+                    img_data = base64.b64encode(img_file.read()).decode('utf-8')
+                # Определяем тип файла по расширению
+                ext = os.path.splitext(chosen_ref)[1].lower()
+                mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png"
+                # Вставляем картинку прямо в промпт как data URL
+                data_url = f"data:{mime};base64,{img_data}"
+                final_prompt = f"{data_url} {final_prompt}"
 
     encoded_prompt = urllib.parse.quote(final_prompt)
     api_url = f"{BANANA_BASE_URL}{encoded_prompt}?aspect_ratio=2:3&token={NANO_BANANA_TOKEN}&banana"
