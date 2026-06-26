@@ -44,7 +44,7 @@ def generate_media_via_banana(trigger_type, visual_description):
             if all_refs:
                 chosen_ref = random.choice(all_refs)
                 ref_url = f"{GITHUB_REFS_URL}{chosen_ref}"
-                final_prompt = f"Reference image: {ref_url}, appearance target identical to reference, {final_prompt}"
+                final_prompt = f"Use this photo as face and body reference, make the character look exactly like the person in the photo: {ref_url}. {final_prompt}"
 
     encoded_prompt = urllib.parse.quote(final_prompt)
     api_url = f"{BANANA_BASE_URL}{encoded_prompt}?aspect_ratio=2:3&token={NANO_BANANA_TOKEN}&banana"
