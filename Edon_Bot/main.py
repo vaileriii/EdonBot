@@ -37,8 +37,8 @@ def generate_media_via_banana(trigger_type, visual_description):
     """Генерация картинок и видео через Nano Banana со стилями и референсами"""
     style_prompt = load_file("image_prompt.txt", "realism, 90s retro style, analog film grain, cinematic lighting")
     final_prompt = f"{style_prompt}, {visual_description}"
-    
-if trigger_type == "селфи" or trigger_type == "себя":
+
+    if trigger_type == "селфи" or trigger_type == "себя":
         if os.path.exists(REFS_DIR) and os.listdir(REFS_DIR):
             all_refs = [f for f in os.listdir(REFS_DIR) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
             if all_refs:
@@ -56,7 +56,7 @@ if trigger_type == "селфи" or trigger_type == "себя":
 
     encoded_prompt = urllib.parse.quote(final_prompt)
     api_url = f"{BANANA_BASE_URL}{encoded_prompt}?aspect_ratio=2:3&token={NANO_BANANA_TOKEN}&banana"
-    
+
     try:
         response = requests.get(api_url, timeout=60)
         if response.status_code == 200:
